@@ -1,0 +1,28 @@
+---
+import { authorsHandler } from "@/lib/handlers/authors";
+import { DEFAULT_LOCALE, LOCALES } from "@/i18n/config";
+import { getEntrySlug } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
+
+export const getStaticPaths = async () => {
+  const locales = LOCALES.filter((entry) => entry !== DEFAULT_LOCALE);
+  const paths = [];
+  for (const locale of locales) {
+    const authors = await authorsHandler.allAuthors(locale);
+    paths.push(
+      ...authors.map((author) => ({
+        params: { locale, id: getEntrySlug(author) },
+        props: { author },
+      }))
+    );
+  }
+  return paths;
+};
+
+const { author } = Astro.props;
+const locale = Astro.currentLocale ?? Astro.params.locale;
+const authorSlug = getEntrySlug(author);
+const authorUrl = `${localizePath(locale, `/authors/${authorSlug}`)}/1`;
+---
+
+<meta http-equiv="refresh" content={`0;url=${authorUrl}`} />

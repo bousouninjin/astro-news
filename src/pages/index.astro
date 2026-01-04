@@ -1,14 +1,16 @@
 ---
 import BaseLayout from "@/layouts/base.astro";
-import { getEntry } from "astro:content";
+import { getEntryBySlug } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
 import Headlines from "@/pages/_home/headlines.astro";
 import LatestNews from "@/pages/_home/latestNews.astro";
 import Authors from "@/pages/_home/authors.astro";
 
-const entry = await getEntry("views", "home");
+const locale = Astro.currentLocale;
+const entry = await getEntryBySlug("views", "home", locale);
 
 if (!entry) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath(locale, "/404"));
 }
 ---
 

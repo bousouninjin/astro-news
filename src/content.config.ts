@@ -18,7 +18,7 @@ const viewCollection = defineCollection({
 });
 
 const categoryCollection = defineCollection({
-  loader: glob({ pattern: "**/index.json", base: "./src/content/categories" }),
+  loader: glob({ pattern: "**/*.json", base: "./src/content/categories" }),
   schema: categorySchema,
 });
 

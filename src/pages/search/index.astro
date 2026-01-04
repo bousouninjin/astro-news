@@ -1,12 +1,16 @@
 ---
 import BaseLayout from "@/layouts/base.astro";
 import "@pagefind/default-ui/css/ui.css";
-import { getEntry } from "astro:content";
+import { getEntryBySlug } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
+import { t } from "@/i18n/config";
 
-const entry = await getEntry("views", "search");
+const locale = Astro.currentLocale;
+const entry = await getEntryBySlug("views", "search", locale);
+const clearLabel = t(locale, "search.clear");
 
 if (!entry) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath(locale, "/404"));
 }
 ---
 
@@ -14,7 +18,7 @@ if (!entry) {
   <div class="container py-4">
     <script is:inline src="/pagefind/pagefind-ui.js"></script>
 
-    <div id="search"></div>
+    <div id="search" data-clear-label={clearLabel}></div>
 
     <script>
       const initializePagefind = () => {
@@ -43,8 +47,12 @@ if (!entry) {
             const params = new URLSearchParams(url.search);
             const query = params.get("q");
 
+            const clearLabel =
+              document
+                .getElementById("search")
+                ?.getAttribute("data-clear-label") ?? "";
             if (clearButton) {
-              clearButton.textContent = "× Clear";
+              clearButton.textContent = clearLabel;
             }
             if (query && input) {
               input.value = query;

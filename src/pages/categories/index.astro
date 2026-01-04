@@ -1,22 +1,26 @@
 ---
 import ListLayout from "@/layouts/list.astro";
-import { getEntry } from "astro:content";
 import { categoriesHandler } from "@/lib/handlers/categories";
 import NewsCard from "@/components/cards/newsCard.astro";
 import ArrowRight02 from "@/assets/svgs/arrow-right-02.astro";
+import { getEntryBySlug } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
+import { t } from "@/i18n/config";
 
-const entry = await getEntry("views", "categories");
+const locale = Astro.currentLocale;
+const entry = await getEntryBySlug("views", "categories", locale);
+const articlesLabel = t(locale, "categories.articles");
 
 if (!entry) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath(locale, "/404"));
 }
 
 // Fetch all articles to extract categories
-const articles = categoriesHandler.allCategoriesWithLatestArticles();
+const articles = await categoriesHandler.allCategoriesWithLatestArticles(locale);
 ---
 
 {/* Use your BaseLayout and pass the entry for metadata */}
-<ListLayout header={"All Categories"} entry={entry}>
+<ListLayout header={t(locale, "categories.all")} entry={entry}>
   <ul class="w-full space-y-8 my-6">
     {
       articles.map((category) => {
@@ -28,14 +32,14 @@ const articles = categoriesHandler.allCategoriesWithLatestArticles();
               <h2 class="text-xl inline-flex items-center">
                 {title}{" "}
                 <span class="text-xs font-sans ml-2 text-primary">
-                  ({articleCount} Articles)
+                  ({articleCount} {articlesLabel})
                 </span>
               </h2>
               <a
-                href={`/categories/${path}/1`}
+                href={`${localizePath(locale, `/categories/${path}`)}/1`}
                 class="group flex text-sm items-center gap-1 hover:gap-2 transition-all duration-200"
               >
-                See All
+                {t(locale, "categories.seeAll")}
                 <span class="transform group-hover:translate-x-1 transition-transform duration-200">
                   <ArrowRight02 size="16" />
                 </span>

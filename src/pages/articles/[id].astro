@@ -5,12 +5,14 @@ import ContentLayout from "@/layouts/content.astro";
 import ArticleHeader from "./_components/article-header.astro";
 
 import { articlesHandler } from "@/lib/handlers/articles";
+import { DEFAULT_LOCALE } from "@/i18n/config";
+import { getEntrySlug } from "@/i18n/content";
 
 export const getStaticPaths = async () => {
-  const articles = articlesHandler.allArticles();
+  const articles = await articlesHandler.allArticles(DEFAULT_LOCALE);
 
   return articles.map((article) => ({
-    params: { id: article.id },
+    params: { id: getEntrySlug(article) },
     props: { article },
   }));
 };

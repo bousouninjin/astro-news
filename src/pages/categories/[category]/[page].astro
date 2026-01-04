@@ -7,18 +7,26 @@ import ListLayout from "@/layouts/list.astro";
 
 import Pagination from "@/components/shared/pagination.astro";
 import WideCard from "@/components/cards/wideCard.astro";
-import { getEntry } from "astro:content";
+import {
+  getEntryBySlug,
+  getEntryKey,
+  getEntrySlug,
+  getReferenceKey,
+} from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
+import { DEFAULT_LOCALE } from "@/i18n/config";
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const allCategories = categoriesHandler.allCategories();
-  const allArticles = articlesHandler.allArticles();
+  const allCategories = await categoriesHandler.allCategories(DEFAULT_LOCALE);
+  const allArticles = await articlesHandler.allArticles(DEFAULT_LOCALE);
 
   return allCategories.flatMap((category) => {
+    const categoryKey = getEntryKey(category);
     const filteredArticles = allArticles.filter(
-      (article) => article.data.category.id === category.id
+      (article) => getReferenceKey(article.data.category) === categoryKey
     );
     return paginate(filteredArticles, {
-      params: { category: category.id },
+      params: { category: getEntrySlug(category) },
       props: { postsLength: filteredArticles.length },
       pageSize: SITE.postsPerPage,
     });
@@ -29,17 +37,18 @@ const { page } = Astro.props;
 const { postsLength } = Astro.props;
 const params = Astro.params;
 const articles = page.data;
-const pathname = new URL(Astro.request.url).pathname.split("/");
-const basePath = `${pathname[1]}/${pathname[2]}`;
 
-const entry = await getEntry("views", "categories");
+const locale = Astro.currentLocale;
+const baseUrl = localizePath(locale, `/categories/${params.category}`);
+const entry = await getEntryBySlug("views", "categories", locale);
+const category = await categoriesHandler.oneCategory(locale, params.category);
 
 if (!entry) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath(locale, "/404"));
 }
 ---
 
-<ListLayout header={params.category} entry={entry}>
+<ListLayout header={category.data.title} entry={entry}>
   <ul class="flex flex-col gap-2 flex-1">
     {
       articles.map((article) => (
@@ -56,10 +65,10 @@ if (!entry) {
         length={page.lastPage}
         currentUrl={page.url.current}
         currentPage={page.currentPage}
-        baseUrl={`/${basePath}`}
+        baseUrl={baseUrl}
         prevUrl={page.url.prev}
         nextUrl={page.url.next}
-        lastUrl={`/${basePath}/${page.lastPage}`}
+        lastUrl={`${baseUrl}/${page.lastPage}`}
       />
     ) : null
   }

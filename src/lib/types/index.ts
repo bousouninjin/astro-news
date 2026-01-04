@@ -10,7 +10,8 @@ export type Icon = {
 
 export type Link = {
   href: string;
-  text: string;
+  text?: string;
+  labelKey?: string;
   icon?: string;
   target?: "_blank" | "_self";
 };

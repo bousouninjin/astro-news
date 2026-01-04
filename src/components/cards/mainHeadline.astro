@@ -5,6 +5,12 @@ import { render } from "astro:content";
 import Divider from "@/components/bases/divider.astro";
 import { categoriesHandler } from "@/lib/handlers/categories";
 import { getDateDistance } from "@/lib/utils/date";
+import {
+  getEntrySlug,
+  getReferenceKey,
+  stripLocaleFromKey,
+} from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
 
 type Props = {
   article: CollectionEntry<"articles">;
@@ -12,9 +18,12 @@ type Props = {
 
 const { article } = Astro.props;
 
+const locale = Astro.currentLocale;
 const { remarkPluginFrontmatter } = await render(article);
 
-const category = categoriesHandler.oneCategory(article.data.category.id);
+const categorySlug = stripLocaleFromKey(getReferenceKey(article.data.category));
+const category = await categoriesHandler.oneCategory(locale, categorySlug);
+const articleUrl = localizePath(locale, `/articles/${getEntrySlug(article)}`);
 ---
 
 <article class="group relative isolate flex flex-col-reverse md:flex-col gap-4">
@@ -33,7 +42,7 @@ const category = categoriesHandler.oneCategory(article.data.category.id);
       <h2
         class="text-xl font-semibold lg:group-hover:underline underline-offset-2"
       >
-        <a href={`/articles/${article.id}`}>
+        <a href={articleUrl}>
           <span class="absolute inset-0 z-10 pointer-events-none"></span>
           {article.data.title}
         </a>

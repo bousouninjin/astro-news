@@ -1,0 +1,82 @@
+---
+import type { GetStaticPaths } from "astro";
+import { SITE } from "@/lib/config";
+import { articlesHandler } from "@/lib/handlers/articles";
+import { categoriesHandler } from "@/lib/handlers/categories";
+import ListLayout from "@/layouts/list.astro";
+import Pagination from "@/components/shared/pagination.astro";
+import WideCard from "@/components/cards/wideCard.astro";
+import {
+  getEntryBySlug,
+  getEntryKey,
+  getEntrySlug,
+  getReferenceKey,
+} from "@/i18n/content";
+import { DEFAULT_LOCALE, LOCALES } from "@/i18n/config";
+import { localizePath } from "@/i18n/paths";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const locales = LOCALES.filter((entry) => entry !== DEFAULT_LOCALE);
+  const paths = [];
+  for (const locale of locales) {
+    const allCategories = await categoriesHandler.allCategories(locale);
+    const allArticles = await articlesHandler.allArticles(locale);
+
+    const localePaths = allCategories.flatMap((category) => {
+      const categoryKey = getEntryKey(category);
+      const filteredArticles = allArticles.filter(
+        (article) => getReferenceKey(article.data.category) === categoryKey
+      );
+      return paginate(filteredArticles, {
+        params: { locale, category: getEntrySlug(category) },
+        props: { postsLength: filteredArticles.length },
+        pageSize: SITE.postsPerPage,
+      });
+    });
+
+    paths.push(...localePaths);
+  }
+
+  return paths;
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const { postsLength } = Astro.props;
+const params = Astro.params;
+const articles = page.data;
+
+const locale = Astro.currentLocale ?? Astro.params.locale;
+const baseUrl = localizePath(locale, `/categories/${params.category}`);
+const entry = await getEntryBySlug("views", "categories", locale);
+const category = await categoriesHandler.oneCategory(locale, params.category);
+
+if (!entry) {
+  return Astro.redirect(localizePath(locale, "/404"));
+}
+---
+
+<ListLayout header={category.data.title} entry={entry}>
+  <ul class="flex flex-col gap-2 flex-1">
+    {
+      articles.map((article) => (
+        <WideCard
+          article={article}
+          isLast={articles.lastIndexOf(article) === articles.length - 1}
+        />
+      ))
+    }
+  </ul>
+  {
+    postsLength > SITE.postsPerPage ? (
+      <Pagination
+        length={page.lastPage}
+        currentUrl={page.url.current}
+        currentPage={page.currentPage}
+        baseUrl={baseUrl}
+        prevUrl={page.url.prev}
+        nextUrl={page.url.next}
+        lastUrl={`${baseUrl}/${page.lastPage}`}
+      />
+    ) : null
+  }
+</ListLayout>

@@ -1,0 +1,12 @@
+---
+import { DEFAULT_LOCALE, LOCALES } from "@/i18n/config";
+import { localizePath } from "@/i18n/paths";
+
+export const getStaticPaths = () =>
+  LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).map((locale) => ({
+    params: { locale },
+  }));
+
+const locale = Astro.currentLocale ?? Astro.params.locale;
+return Astro.redirect(localizePath(locale, "/articles/1"));
+---

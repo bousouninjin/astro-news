@@ -6,46 +6,63 @@ import { authorsHandler } from "@/lib/handlers/authors";
 import ListLayout from "@/layouts/list.astro";
 import WideCard from "@/components/cards/wideCard.astro";
 import Pagination from "@/components/shared/pagination.astro";
-import { getEntry } from "astro:content";
+import { getEntryBySlug, getEntryKey, getEntrySlug, getReferenceKey } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
+import { DEFAULT_LOCALE, t } from "@/i18n/config";
 
 export const getStaticPaths = (({ paginate }) => {
-  const allAuthors = authorsHandler.allAuthors();
-  const allArticles = articlesHandler.allArticles();
+  const buildPaths = async () => {
+    const allAuthors = await authorsHandler.allAuthors(DEFAULT_LOCALE);
+    const allArticles = await articlesHandler.allArticles(DEFAULT_LOCALE);
 
-  return allAuthors.flatMap((author) => {
-    const filteredArticles = allArticles.filter((article) =>
-      article.data.authors.map((a) => a.id).includes(author.id),
-    );
-    return paginate(filteredArticles, {
-      params: { id: author.id },
-      pageSize: SITE.postsPerPage,
+    return allAuthors.flatMap((author) => {
+      const authorKey = getEntryKey(author);
+      const filteredArticles = allArticles.filter((article) =>
+        article.data.authors
+          .map((ref) => getReferenceKey(ref))
+          .includes(authorKey)
+      );
+      return paginate(filteredArticles, {
+        params: { id: getEntrySlug(author) },
+        pageSize: SITE.postsPerPage,
+      });
     });
-  });
+  };
+
+  return buildPaths();
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;
 const params = Astro.params;
 const articles = page.data;
-const pathname = new URL(Astro.request.url).pathname.split("/");
-const basePath = `${pathname[1]}/${pathname[2]}`;
+const locale = Astro.currentLocale;
+const basePath = localizePath(locale, `/authors/${params.id}`);
 
-const entry = await getEntry("views", "author");
-const author = authorsHandler.findAuthor(params.id);
+const entry = await getEntryBySlug("views", "author", locale);
+const author = await authorsHandler.findAuthor(locale, params.id);
 
 if (!entry) {
-  return Astro.redirect("/404");
+  return Astro.redirect(localizePath(locale, "/404"));
 }
 
 const [HEADER] = entry.data.blocks;
+const authorHeader = t(locale, "author.pageTitle", {
+  name: author.data.name,
+  title: HEADER.title,
+});
+const authorMetaTitle = t(locale, "author.pageTitle", {
+  name: author.data.name,
+  title: entry.data.title,
+});
 ---
 
 <ListLayout
-  header={`${author.data.name}'s ${HEADER.title}`}
+  header={authorHeader}
   entry={{
     ...entry,
     data: {
       ...entry.data,
-      title: `${author.data.name}'s ${entry.data.title}`,
+      title: authorMetaTitle,
     },
   }}
 >
@@ -66,9 +83,9 @@ const [HEADER] = entry.data.blocks;
     length={page.lastPage}
     currentUrl={page.url.current}
     currentPage={page.currentPage}
-    baseUrl={`/${basePath}`}
+    baseUrl={basePath}
     prevUrl={page.url.prev}
     nextUrl={page.url.next}
-    lastUrl={`/${basePath}/${page.lastPage}`}
+    lastUrl={`${basePath}/${page.lastPage}`}
   />
 </ListLayout>

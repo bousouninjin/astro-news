@@ -1,1 +1,6 @@
-<meta http-equiv="refresh" content="0;url=/articles/1" />
+---
+import { localizePath } from "@/i18n/paths";
+
+const locale = Astro.currentLocale;
+return Astro.redirect(localizePath(locale, "/articles/1"));
+---

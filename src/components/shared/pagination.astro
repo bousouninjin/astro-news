@@ -3,6 +3,7 @@ import ArrowLeftDouble from "@/assets/svgs/arrow-left-double.astro";
 import ArrowRightDouble from "@/assets/svgs/arrow-right-double.astro";
 import ArrowLeft01 from "@/assets/svgs/arrow-left-01.astro";
 import ArrowRight01 from "@/assets/svgs/arrow-right-01.astro";
+import { t } from "@/i18n/config";
 
 type Props = {
   length: number;
@@ -16,6 +17,7 @@ type Props = {
 
 const { length, currentUrl, currentPage, baseUrl, prevUrl, nextUrl, lastUrl } =
   Astro.props;
+const locale = Astro.currentLocale;
 
 // Define the maximum number of visible buttons
 const maxVisibleButtons = 4;
@@ -43,14 +45,17 @@ const paginationList = Array.from(
   <nav class="join">
     {
       `${baseUrl}/1` == `${currentUrl}` ? (
-        <span class="join-item btn btn-sm btn-disabled" aria-label="First page">
+        <span
+          class="join-item btn btn-sm btn-disabled"
+          aria-label={t(locale, "pagination.first")}
+        >
           <ArrowLeftDouble />
         </span>
       ) : (
         <a
           href={`${baseUrl}/1`}
           class="join-item btn btn-sm"
-          aria-label="First page"
+          aria-label={t(locale, "pagination.first")}
         >
           <ArrowLeftDouble />
         </a>
@@ -60,11 +65,13 @@ const paginationList = Array.from(
     {
       prevUrl ? (
         <a href={prevUrl} class="join-item btn btn-sm">
-          <ArrowLeft01 /> <span class="hidden lg:block">Previous</span>
+          <ArrowLeft01 />{" "}
+          <span class="hidden lg:block">{t(locale, "pagination.previous")}</span>
         </a>
       ) : (
         <span class="join-item btn btn-sm btn-disabled">
-          <ArrowLeft01 /> <span class="hidden lg:block">Previous</span>
+          <ArrowLeft01 />{" "}
+          <span class="hidden lg:block">{t(locale, "pagination.previous")}</span>
         </span>
       )
     }
@@ -83,22 +90,31 @@ const paginationList = Array.from(
     {
       !nextUrl ? (
         <span class="join-item btn btn-sm btn-disabled">
-          <span class="hidden lg:block">Next</span> <ArrowRight01 />
+          <span class="hidden lg:block">{t(locale, "pagination.next")}</span>{" "}
+          <ArrowRight01 />
         </span>
       ) : (
         <a href={nextUrl} class="join-item btn btn-sm">
-          <span class="hidden lg:block">Next</span> <ArrowRight01 />
+          <span class="hidden lg:block">{t(locale, "pagination.next")}</span>{" "}
+          <ArrowRight01 />
         </a>
       )
     }
 
     {
       lastUrl == currentUrl ? (
-        <span class="join-item btn btn-sm btn-disabled" aria-label="Last page">
+        <span
+          class="join-item btn btn-sm btn-disabled"
+          aria-label={t(locale, "pagination.last")}
+        >
           <ArrowRightDouble />
         </span>
       ) : (
-        <a href={lastUrl} class="join-item btn btn-sm" aria-label="Last page">
+        <a
+          href={lastUrl}
+          class="join-item btn btn-sm"
+          aria-label={t(locale, "pagination.last")}
+        >
           <ArrowRightDouble />
         </a>
       )

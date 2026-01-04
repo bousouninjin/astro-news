@@ -3,6 +3,9 @@ import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 import { getDateDistance, normalizeDate } from "@/lib/utils/date";
 import Divider from "../bases/divider.astro";
+import { getEntrySlug, getReferenceKey, stripLocaleFromKey } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
+import { categoriesHandler } from "@/lib/handlers/categories";
 
 type Props = {
   article: CollectionEntry<"articles">;
@@ -10,6 +13,10 @@ type Props = {
 };
 
 const { article, isLast } = Astro.props;
+const locale = Astro.currentLocale;
+const articleUrl = localizePath(locale, `/articles/${getEntrySlug(article)}`);
+const categorySlug = stripLocaleFromKey(getReferenceKey(article.data.category));
+const category = await categoriesHandler.oneCategory(locale, categorySlug);
 ---
 
 <li
@@ -39,7 +46,7 @@ const { article, isLast } = Astro.props;
     </div>
     <div class="flex-1 space-y-2">
       <h3 class="text-xl font-semibold lg:group-hover:underline">
-        <a href={`/articles/${article.id}`}>
+        <a href={articleUrl}>
           <span class="absolute inset-0 z-10"></span>
           {article.data.title}
         </a>
@@ -60,7 +67,7 @@ const { article, isLast } = Astro.props;
       <Divider />
       <small class="flex items-center gap-1">
         <span class="capitalize text-sm">
-          {article.data.category.id}
+          {category.data.title}
         </span>
       </small>
     </div>

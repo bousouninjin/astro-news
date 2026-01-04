@@ -2,15 +2,19 @@
 import NewsCard from "@/components/cards/newsCard.astro";
 import HeaderSection from "./headerSection.astro";
 import { articlesHandler } from "@/lib/handlers/articles";
+import { localizePath } from "@/i18n/paths";
+import { t } from "@/i18n/config";
 
-const articles = articlesHandler.allArticles();
+const locale = Astro.currentLocale;
+const articles = await articlesHandler.allArticles(locale);
+const articlesUrl = localizePath(locale, "/articles");
 ---
 
 <section class="container pt-12 pb-0 space-y-4" data-pagefind-ignore="all">
   <HeaderSection
-    title="Latest News"
-    link_title="View all"
-    link_url="/articles"
+    title={t(locale, "header.latestNews")}
+    link_title={t(locale, "header.viewAll")}
+    link_url={articlesUrl}
   />
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6 md:grid-rows-2">
     {

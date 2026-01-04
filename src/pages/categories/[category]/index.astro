@@ -1,13 +1,23 @@
 ---
 import { categoriesHandler } from "@/lib/handlers/categories";
+import { DEFAULT_LOCALE } from "@/i18n/config";
+import { getEntrySlug } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
 
 export function getStaticPaths() {
-  const categories = categoriesHandler.allCategories();
-  return categories.map((category) => ({ params: { category: category.id } }));
+  const buildPaths = async () => {
+    const categories = await categoriesHandler.allCategories(DEFAULT_LOCALE);
+    return categories.map((category) => ({
+      params: { category: getEntrySlug(category) },
+    }));
+  };
+  return buildPaths();
 }
 
 const { category } = Astro.params;
+const locale = Astro.currentLocale;
+const categoryUrl = `${localizePath(locale, `/categories/${category}`)}/1`;
 ---
 
 <!-- TODO: show last articles and fix pagination -->
-<meta http-equiv="refresh" content={`0; url=${`/categories/${category}/1`}`} />
+<meta http-equiv="refresh" content={`0; url=${categoryUrl}`} />

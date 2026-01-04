@@ -1,6 +1,20 @@
 ---
 import Menu from "@/assets/svgs/menu.astro";
-import { NAVIGATION_LINKS, OTHER_LINKS } from "@/lib/config";
+import { OTHER_LINKS } from "@/lib/config";
+import { categoriesHandler } from "@/lib/handlers/categories";
+import { localizePath } from "@/i18n/paths";
+import { t } from "@/i18n/config";
+
+const locale = Astro.currentLocale;
+const categories = await categoriesHandler.allCategories(locale);
+const homeUrl = localizePath(locale, "/");
+const articlesUrl = localizePath(locale, "/articles");
+
+const resolveLink = (href: string) =>
+  href.startsWith("http") ? href : localizePath(locale, href);
+
+const getLabel = (labelKey?: string, fallback?: string) =>
+  labelKey ? t(locale, labelKey as never) : fallback ?? "";
 ---
 
 <div class="dropdown">
@@ -8,7 +22,7 @@ import { NAVIGATION_LINKS, OTHER_LINKS } from "@/lib/config";
     tabindex="0"
     role="button"
     class="btn btn-ghost btn-circle"
-    aria-label="Menu"
+    aria-label={t(locale, "nav.menu")}
   >
     <Menu />
   </button>
@@ -17,18 +31,29 @@ import { NAVIGATION_LINKS, OTHER_LINKS } from "@/lib/config";
     tabindex="0"
     class="menu dropdown-content z-50 bg-base-100 rounded-box w-56 shadow"
   >
-    <li><a href="/" aria-label="Homepage">Home</a></li>
-    <li><a href="/articles" aria-label="Articles Page">Articles</a></li>
+    <li>
+      <a href={homeUrl} aria-label={t(locale, "nav.home")}>
+        {t(locale, "nav.home")}
+      </a>
+    </li>
+    <li>
+      <a href={articlesUrl} aria-label={t(locale, "nav.articles")}>
+        {t(locale, "nav.articles")}
+      </a>
+    </li>
 
     <li>
       <details>
-        <summary>Categories</summary>
+        <summary>{t(locale, "nav.categories")}</summary>
         <ul>
           {
-            NAVIGATION_LINKS.map(({ href, text, target }) => (
+            categories.map((category) => (
               <li>
-                <a href={href} target={target ?? "_self"} aria-label={text}>
-                  {text}
+                <a
+                  href={`${localizePath(locale, `/categories/${category.data.path}`)}/1`}
+                  aria-label={category.data.title}
+                >
+                  {category.data.title}
                 </a>
               </li>
             ))
@@ -39,13 +64,17 @@ import { NAVIGATION_LINKS, OTHER_LINKS } from "@/lib/config";
 
     <li>
       <details>
-        <summary>Other Pages</summary>
+        <summary>{t(locale, "nav.otherPages")}</summary>
         <ul>
           {
-            OTHER_LINKS.map(({ href, text, target }) => (
+            OTHER_LINKS.map(({ href, text, labelKey, target }) => (
               <li>
-                <a href={href} target={target ?? "_self"} aria-label={text}>
-                  {text}
+                <a
+                  href={resolveLink(href)}
+                  target={target ?? "_self"}
+                  aria-label={getLabel(labelKey, text)}
+                >
+                  {getLabel(labelKey, text)}
                 </a>
               </li>
             ))

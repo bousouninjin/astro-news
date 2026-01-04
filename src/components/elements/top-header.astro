@@ -4,6 +4,13 @@ import Search01 from "@/assets/svgs/search-01.astro";
 import MenuDropdown from "./menu-dropdown.astro";
 import { SITE } from "@/lib/config";
 import ThemeController from "../bases/theme-controller.astro";
+import LocaleSwitcher from "./locale-switcher.astro";
+import { localizePath } from "@/i18n/paths";
+import { t } from "@/i18n/config";
+
+const locale = Astro.currentLocale;
+const homeUrl = localizePath(locale, "/");
+const searchUrl = localizePath(locale, "/search");
 ---
 
 <div
@@ -11,14 +18,23 @@ import ThemeController from "../bases/theme-controller.astro";
 >
   <div class="navbar-start lg:w-1/2">
     <MenuDropdown />
-    <a class="text-xl px-2 text-nowrap lg:hidden" href="/">{SITE.title}</a>
+    <a class="text-xl px-2 text-nowrap lg:hidden" href={homeUrl}>
+      {t(locale, "site.title")}
+    </a>
   </div>
   <div class="navbar-center hidden lg:flex">
-    <a class="text-xl px-2" href="/">{SITE.title}</a>
+    <a class="text-xl px-2" href={homeUrl}>
+      {t(locale, "site.title")}
+    </a>
   </div>
   <div class="navbar-end">
     <ThemeController />
-    <a class="btn btn-ghost btn-circle" href="/search" aria-label="Search">
+    <LocaleSwitcher />
+    <a
+      class="btn btn-ghost btn-circle"
+      href={searchUrl}
+      aria-label={t(locale, "nav.search")}
+    >
       <Search01 />
     </a>
     <a

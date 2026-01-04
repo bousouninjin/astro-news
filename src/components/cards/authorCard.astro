@@ -1,11 +1,15 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
+import { getEntrySlug } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
 type Props = {
   author: CollectionEntry<"authors">;
 };
 
 const { author } = Astro.props;
+const locale = Astro.currentLocale;
+const authorUrl = localizePath(locale, `/authors/${getEntrySlug(author)}`);
 ---
 
 <li class="group relative isolate mx-auto w-full">
@@ -20,7 +24,7 @@ const { author } = Astro.props;
   />
   <div class="flex flex-col gap-0.5 mt-2">
     <h3 class="text-base font-semibold group-hover:underline">
-      <a href={`/authors/${author.id}`}>
+      <a href={authorUrl}>
         <span class="absolute inset-0 z-10 pointer-events-none"></span>
         {author.data.name}
       </a>

@@ -3,7 +3,7 @@ import { collection, fields } from "@keystatic/core";
 export const authorsKs = collection({
   label: "Authors",
   slugField: "name",
-  path: "src/content/authors/*/",
+  path: "src/content/authors/en/*/",
   format: { contentField: "content" },
   entryLayout: "form",
   schema: {

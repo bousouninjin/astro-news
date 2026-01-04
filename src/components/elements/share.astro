@@ -1,6 +1,7 @@
 ---
 import ShareItem from "@/components/bases/share-item.astro";
 import ScriptShare from "@/components/bases/script.astro";
+import { t } from "@/i18n/config";
 
 type Props = {
   text: string;
@@ -8,6 +9,7 @@ type Props = {
 
 const { text } = Astro.props;
 const { pathname } = Astro.url;
+const locale = Astro.currentLocale;
 
 // Optimize URL construction - calculate once
 const shareUrl = `${import.meta.env.SITE}${pathname}`;
@@ -16,31 +18,31 @@ const shareUrl = `${import.meta.env.SITE}${pathname}`;
 const socialPlatforms = [
   {
     icon: "clipboard" as const,
-    title: "Copy Link",
+    title: t(locale, "share.copyLink"),
     platform: "clipboard",
     hoverColor: "hover:bg-primary hover:text-primary-content",
   },
   {
     icon: "facebook" as const,
-    title: "Share on Facebook",
+    title: t(locale, "share.facebook"),
     platform: "facebook",
     hoverColor: "hover:bg-[#3b5998] hover:text-primary-content",
   },
   {
     icon: "twitter" as const,
-    title: "Share on Twitter",
+    title: t(locale, "share.twitter"),
     platform: "twitter",
     hoverColor: "hover:bg-[#00acee] hover:text-primary-content",
   },
   {
     icon: "linkedin" as const,
-    title: "Share on LinkedIn",
+    title: t(locale, "share.linkedin"),
     platform: "linkedin",
     hoverColor: "hover:bg-[#0072b1] hover:text-primary-content",
   },
   {
     icon: "whatsapp" as const,
-    title: "Share on WhatsApp",
+    title: t(locale, "share.whatsapp"),
     platform: "whatsapp",
     hoverColor: "hover:bg-[#25d366] hover:text-primary-content",
   },

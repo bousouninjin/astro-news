@@ -9,6 +9,8 @@ import Divider from "@/components/bases/divider.astro";
 import { categoriesHandler } from "@/lib/handlers/categories";
 import { authorsHandler } from "@/lib/handlers/authors";
 import Share from "@/components/elements/share.astro";
+import { getEntrySlug, getReferenceKey, stripLocaleFromKey } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
 
 type Props = {
   article: CollectionEntry<"articles">;
@@ -17,8 +19,11 @@ type Props = {
 
 const { article, readingTime } = Astro.props;
 
-const category = categoriesHandler.oneCategory(article.data.category.id);
-const authors = authorsHandler.getAuthors(article.data.authors);
+const locale = Astro.currentLocale;
+const categorySlug = stripLocaleFromKey(getReferenceKey(article.data.category));
+const category = await categoriesHandler.oneCategory(locale, categorySlug);
+const authors = await authorsHandler.getAuthors(locale, article.data.authors);
+const categoryUrl = localizePath(locale, `/categories/${category.data.path}`);
 ---
 
 <section
@@ -38,7 +43,7 @@ const authors = authorsHandler.getAuthors(article.data.authors);
   </div>
   <div class="container my-4 max-w-5xl lg:hidden flex items-center gap-2">
     <ResourcesAdd size="16" />
-    <a href={`/categories/${category.data.path}`} class="a-01 font-semibold"
+    <a href={categoryUrl} class="a-01 font-semibold"
       >{category.data.title}</a
     >
   </div>
@@ -50,7 +55,7 @@ const authors = authorsHandler.getAuthors(article.data.authors);
       <div class="text-base-content/70 flex items-center gap-2">
         <span class="hidden lg:flex items-center gap-1">
           <ResourcesAdd size="15" />
-          <a href={`/categories/${category.id}`} class="a-01 font-semibold"
+          <a href={categoryUrl} class="a-01 font-semibold"
             >{category.data.title}</a
           >
         </span>
@@ -85,7 +90,10 @@ const authors = authorsHandler.getAuthors(article.data.authors);
             authors.map((author) => (
               <div class="flex items-center gap-2">
                 <a
-                  href={`/authors/${author.id}`}
+                  href={localizePath(
+                    locale,
+                    `/authors/${getEntrySlug(author)}`
+                  )}
                   class="flex items-center gap-2"
                 >
                   <div class="avatar">

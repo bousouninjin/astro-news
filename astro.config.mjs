@@ -23,6 +23,14 @@ if (RUN_KEYSTATIC === "true") {
 export default defineConfig({
   site: SITE.url,
   base: SITE.basePath,
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "ja"],
+    routing: "manual",
+    fallback: {
+      ja: "en",
+    },
+  },
   markdown: {
     remarkPlugins: [readingTime, modifiedTime],
   },

@@ -1,7 +1,24 @@
 ---
-import { NAVIGATION_LINKS, SOCIAL_LINKS, OTHER_LINKS } from "@/lib/config";
+import { SOCIAL_LINKS, OTHER_LINKS } from "@/lib/config";
 import Hashtag from "@/assets/svgs/hashtag.astro";
 import Icon from "../bases/icon.astro";
+import { categoriesHandler } from "@/lib/handlers/categories";
+import { localizePath } from "@/i18n/paths";
+import { t } from "@/i18n/config";
+
+const locale = Astro.currentLocale;
+const categories = await categoriesHandler.allCategories(locale);
+const homeUrl = localizePath(locale, "/");
+const articlesUrl = localizePath(locale, "/articles");
+const frameworkToken = "__FRAMEWORK__";
+const builtWith = t(locale, "footer.builtWith", { framework: frameworkToken });
+const [builtWithPrefix, builtWithSuffix = ""] = builtWith.split(frameworkToken);
+
+const resolveLink = (href: string) =>
+  href.startsWith("http") ? href : localizePath(locale, href);
+
+const getLabel = (labelKey?: string, fallback?: string) =>
+  labelKey ? t(locale, labelKey as never) : fallback ?? "";
 ---
 
 <footer
@@ -12,24 +29,31 @@ import Icon from "../bases/icon.astro";
       <aside class="flex items-center gap-2">
         <Hashtag />
         <p>
-          <strong class="text-lg">Astro News</strong>
+          <strong class="text-lg">{t(locale, "site.title")}</strong>
           <br />
-          A news website built with <a
+          {builtWithPrefix}
+          <a
             class="underline"
             href="https://astro.build"
             target="_blank">Astro</a
-          >.
+          >
+          {builtWithSuffix}
         </p>
       </aside>
       <nav
         class="flex flex-col gap-4 lg:flex-row lg:flex-wrap text-base lg:text-sm font-semibold"
       >
-        <a href="/" class="link link-hover">Home</a>
-        <a href="/articles" class="link link-hover">Articles</a>
+        <a href={homeUrl} class="link link-hover">{t(locale, "nav.home")}</a>
+        <a href={articlesUrl} class="link link-hover">
+          {t(locale, "nav.articles")}
+        </a>
         {
-          NAVIGATION_LINKS.map(({ href, text, target }) => (
-            <a href={href} class="link link-hover" target={target ?? "_self"}>
-              {text}
+          categories.map((category) => (
+            <a
+              href={`${localizePath(locale, `/categories/${category.data.path}`)}/1`}
+              class="link link-hover"
+            >
+              {category.data.title}
             </a>
           ))
         }
@@ -39,7 +63,7 @@ import Icon from "../bases/icon.astro";
     <div class="flex flex-col gap-4">
       <nav>
         <div class="flex gap-4">
-          <p class="font-bold">Social Media:</p>
+          <p class="font-bold">{t(locale, "footer.socialMedia")}:</p>
           <ul class="flex flex-wrap gap-4">
             {
               SOCIAL_LINKS.map(({ href, icon, text, target }) => (
@@ -61,9 +85,13 @@ import Icon from "../bases/icon.astro";
       </nav>
       <nav class="flex flex-wrap gap-4 text-xs mt-2">
         {
-          OTHER_LINKS.map(({ href, text, target }) => (
-            <a href={href} class="link link-hover" target={target ?? "_self"}>
-              {text}
+          OTHER_LINKS.map(({ href, text, labelKey, target }) => (
+            <a
+              href={resolveLink(href)}
+              class="link link-hover"
+              target={target ?? "_self"}
+            >
+              {getLabel(labelKey, text)}
             </a>
           ))
         }

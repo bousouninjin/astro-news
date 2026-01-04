@@ -1,22 +1,30 @@
 ---
-import { getEntry } from "astro:content";
+import { getEntryBySlug } from "@/i18n/content";
+import { localizePath } from "@/i18n/paths";
+import { t } from "@/i18n/config";
 import BaseLayout from "../layouts/base.astro";
 
-const entry = await getEntry("views", "error404");
+const locale = Astro.currentLocale;
+const entry = await getEntryBySlug("views", "error404", locale);
 
 if (!entry) {
   throw new Error("404 page not found");
 }
 
 const [HERO] = entry.data.blocks;
+const heroLink = localizePath(locale, HERO.link_url);
 ---
 
 <BaseLayout entry={entry}>
   <div class="container flex flex-col items-center justify-center py-20">
     <h1 class="text-4xl">{HERO.title}</h1>
     <p class="mt-2">{HERO.description}</p>
-    <a href={HERO.link_url} class="btn mt-6" aria-label="Return to Homepage"
-      >{HERO.link_text}</a
+    <a
+      href={heroLink}
+      class="btn mt-6"
+      aria-label={t(locale, "error.returnHome")}
     >
+      {HERO.link_text}
+    </a>
   </div>
 </BaseLayout>

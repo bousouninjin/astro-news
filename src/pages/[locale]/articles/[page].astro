@@ -1,0 +1,65 @@
+---
+import type { GetStaticPaths } from "astro";
+import ListLayout from "@/layouts/list.astro";
+import { SITE } from "@/lib/config";
+import Pagination from "@/components/shared/pagination.astro";
+import WideCard from "@/components/cards/wideCard.astro";
+import { articlesHandler } from "@/lib/handlers/articles";
+import { getEntryBySlug } from "@/i18n/content";
+import { DEFAULT_LOCALE, LOCALES } from "@/i18n/config";
+import { localizePath } from "@/i18n/paths";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const paths = [];
+  for (const locale of LOCALES.filter((entry) => entry !== DEFAULT_LOCALE)) {
+    const articles = await articlesHandler.allArticles(locale);
+    paths.push(
+      ...paginate(articles, {
+        pageSize: SITE.postsPerPage,
+        params: { locale },
+      })
+    );
+  }
+  return paths;
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const articles = page.data;
+const locale = Astro.currentLocale ?? Astro.params.locale;
+const entry = await getEntryBySlug("views", "articles", locale);
+
+if (!entry) {
+  return Astro.redirect(localizePath(locale, "/404"));
+}
+
+const [HEADER] = entry.data.blocks;
+const baseUrl = localizePath(locale, "/articles");
+---
+
+<ListLayout header={HEADER.title} entry={entry}>
+  <section class="flex-1">
+    <ul class="flex flex-col gap-4">
+      {
+        articles.map((article) => (
+          <WideCard
+            article={article}
+            isLast={articles.lastIndexOf(article) === articles.length - 1}
+          />
+        ))
+      }
+    </ul>
+  </section>
+  {
+    (
+      <Pagination
+        length={page.lastPage}
+        currentUrl={page.url.current}
+        currentPage={page.currentPage}
+        baseUrl={baseUrl}
+        prevUrl={page.url.prev}
+        nextUrl={page.url.next}
+        lastUrl={`${baseUrl}/${page.lastPage}`}
+      />
+    )
+  }
+</ListLayout>

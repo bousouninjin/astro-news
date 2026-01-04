@@ -1,18 +1,18 @@
 import rss from "@astrojs/rss";
-import { getCollection } from "astro:content";
-import { SITE } from "../lib/config";
+import { DEFAULT_LOCALE, t } from "@/i18n/config";
+import { getCollectionByLocale, getEntrySlug } from "@/i18n/content";
 
 export async function GET(context) {
-  const articles = await getCollection("articles");
+  const articles = await getCollectionByLocale("articles", DEFAULT_LOCALE);
   return rss({
-    title: SITE.title,
-    description: SITE.description,
+    title: t(DEFAULT_LOCALE, "site.title"),
+    description: t(DEFAULT_LOCALE, "site.description"),
     site: context.site,
     items: articles.map((article) => ({
       title: article.data.title,
       pubDate: article.data.publishedTime,
       description: article.data.description,
-      link: `/articles/${article.id}/`,
+      link: `/articles/${getEntrySlug(article)}/`,
     })),
   });
 }

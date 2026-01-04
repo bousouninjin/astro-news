@@ -1,0 +1,39 @@
+---
+import { LOCALE_LABELS, normalizeLocale, t } from "@/i18n/config";
+import { getLocaleLinks } from "@/i18n/paths";
+
+const currentLocale = normalizeLocale(Astro.currentLocale);
+const links = getLocaleLinks(Astro.url.pathname, currentLocale);
+const currentLabel = LOCALE_LABELS[currentLocale];
+---
+
+<div class="dropdown dropdown-end">
+  <button
+    tabindex="0"
+    role="button"
+    class="btn btn-ghost btn-sm"
+    aria-label={t(currentLocale, "nav.language")}
+  >
+    <span class="text-xs font-semibold">{currentLabel}</span>
+  </button>
+  <ul
+    tabindex="0"
+    class="menu dropdown-content z-50 bg-base-100 rounded-box w-36 shadow"
+  >
+    {
+      links.map((link) => (
+        <li>
+          <a
+            href={link.url}
+            aria-current={link.locale === currentLocale ? "page" : undefined}
+            class:list={[
+              link.locale === currentLocale ? "font-semibold" : "",
+            ]}
+          >
+            {LOCALE_LABELS[link.locale]}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>

@@ -7,17 +7,26 @@ import "@fontsource-variable/source-serif-4";
 import { ClientRouter } from "astro:transitions";
 import { SITE } from "@/lib/config";
 import type { ArticleMeta, Meta } from "@/lib/types";
+import { getLocaleLinks, localizePath } from "@/i18n/paths";
+import { normalizeLocale, t } from "@/i18n/config";
 
 type Props = {
   meta: Meta | ArticleMeta;
 };
 
 const { meta } = Astro.props;
+const locale = normalizeLocale(Astro.currentLocale);
 
 // Type guard to check if props is ArticleMeta
 const isArticleMeta = (props: Props["meta"]): props is ArticleMeta =>
   props.type === "article";
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+const localeLinks = getLocaleLinks(Astro.url.pathname, locale).map((link) => ({
+  ...link,
+  url: new URL(link.url, Astro.site).href,
+}));
+const defaultLocaleUrl =
+  localeLinks.find((link) => link.isDefault)?.url ?? canonicalURL;
 
 const OGImage = new URL(meta.ogImage, Astro.url).href;
 ---
@@ -33,7 +42,7 @@ const OGImage = new URL(meta.ogImage, Astro.url).href;
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Astro News" />
+  <meta name="apple-mobile-web-app-title" content={t(locale, "site.title")} />
   <link rel="manifest" href="/site.webmanifest" />
 
   <!-- RSS & Sitemap -->
@@ -41,12 +50,22 @@ const OGImage = new URL(meta.ogImage, Astro.url).href;
   <link
     rel="alternate"
     type="application/rss+xml"
-    title={SITE.title}
+    title={t(locale, "site.title")}
     href={new URL("rss.xml", Astro.site)}
   />
 
   <!-- Canonical URL -->
   <link rel="canonical" href={canonicalURL} />
+  {
+    localeLinks.map((link) => (
+      <link
+        rel="alternate"
+        hreflang={link.locale}
+        href={link.url}
+      />
+    ))
+  }
+  <link rel="alternate" hreflang="x-default" href={defaultLocaleUrl} />
 
   <!-- Page Metadata -->
   <title>{meta.title}</title>
@@ -55,6 +74,14 @@ const OGImage = new URL(meta.ogImage, Astro.url).href;
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content={meta.type} />
+  <meta property="og:locale" content={locale} />
+  {
+    localeLinks
+      .filter((link) => link.locale !== locale)
+      .map((link) => (
+        <meta property="og:locale:alternate" content={link.locale} />
+      ))
+  }
   <meta property="og:url" content={canonicalURL} />
   <meta property="og:title" content={meta.metaTitle} />
   <meta property="og:description" content={meta.description} />
@@ -87,7 +114,10 @@ const OGImage = new URL(meta.ogImage, Astro.url).href;
             <meta property="author" content={author.name} />
             <meta
               property="article:author"
-              content={`${Astro.site}authors/${author.link}`}
+              content={new URL(
+                localizePath(locale, `/authors/${author.link}`),
+                Astro.site
+              ).href}
             />
           </>
         ))}

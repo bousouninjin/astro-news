@@ -1,0 +1,35 @@
+---
+import { getEntryBySlug } from "@/i18n/content";
+import { DEFAULT_LOCALE, LOCALES, t } from "@/i18n/config";
+import { localizePath } from "@/i18n/paths";
+import BaseLayout from "@/layouts/base.astro";
+
+export const getStaticPaths = () =>
+  LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).map((locale) => ({
+    params: { locale },
+  }));
+
+const locale = Astro.currentLocale ?? Astro.params.locale;
+const entry = await getEntryBySlug("views", "error404", locale);
+
+if (!entry) {
+  throw new Error("404 page not found");
+}
+
+const [HERO] = entry.data.blocks;
+const heroLink = localizePath(locale, HERO.link_url);
+---
+
+<BaseLayout entry={entry}>
+  <div class="container flex flex-col items-center justify-center py-20">
+    <h1 class="text-4xl">{HERO.title}</h1>
+    <p class="mt-2">{HERO.description}</p>
+    <a
+      href={heroLink}
+      class="btn mt-6"
+      aria-label={t(locale, "error.returnHome")}
+    >
+      {HERO.link_text}
+    </a>
+  </div>
+</BaseLayout>

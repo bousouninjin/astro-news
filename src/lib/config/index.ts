@@ -1,69 +1,38 @@
 import type { Link } from "../types";
 
 export const SITE = {
-  title: "Astro News",
-  description: "A news website built with Astro",
   author: "Mohammad Rahmani",
   url: "https://astro-news-six.vercel.app",
   github: "https://github.com/Mrahmani71/astro-news",
-  locale: "en-US",
-  dir: "ltr",
   charset: "UTF-8",
   basePath: "/",
   postsPerPage: 4,
 };
 
-export const NAVIGATION_LINKS: Link[] = [
-  {
-    href: "/categories/technology",
-    text: "Technology",
-  },
-  {
-    href: "/categories/programming",
-    text: "Programming",
-  },
-  {
-    href: "/categories/lifestyle",
-    text: "Lifestyle",
-  },
-  {
-    href: "/categories/productivity",
-    text: "Productivity",
-  },
-  {
-    href: "/categories/health",
-    text: "Health",
-  },
-  {
-    href: "/categories/finance",
-    text: "Finance",
-  },
-];
-
 export const OTHER_LINKS: Link[] = [
   {
     href: "/about",
-    text: "About us",
+    labelKey: "nav.about",
   },
   {
     href: "/authors",
-    text: "Authors",
+    labelKey: "nav.authors",
   },
   {
     href: "/contact",
-    text: "Contact",
+    labelKey: "nav.contact",
   },
   {
     href: "/privacy",
-    text: "Privacy",
+    labelKey: "nav.privacy",
   },
   {
     href: "/terms",
-    text: "Terms",
+    labelKey: "nav.terms",
   },
   {
     href: "/cookie-policy",
-    text: "Cookie Policy",
+    labelKey: "nav.cookiePolicy",
   },
   {
     href: "https://astro-news-six.vercel.app/rss.xml",

@@ -1,0 +1,27 @@
+---
+import BaseLayout from "@/layouts/base.astro";
+import { getEntryBySlug } from "@/i18n/content";
+import { DEFAULT_LOCALE, LOCALES } from "@/i18n/config";
+import { localizePath } from "@/i18n/paths";
+import Headlines from "@/pages/_home/headlines.astro";
+import LatestNews from "@/pages/_home/latestNews.astro";
+import Authors from "@/pages/_home/authors.astro";
+
+export const getStaticPaths = () =>
+  LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).map((locale) => ({
+    params: { locale },
+  }));
+
+const locale = Astro.currentLocale ?? Astro.params.locale;
+const entry = await getEntryBySlug("views", "home", locale);
+
+if (!entry) {
+  return Astro.redirect(localizePath(locale, "/404"));
+}
+---
+
+<BaseLayout entry={entry}>
+  <Headlines />
+  <LatestNews />
+  <Authors />
+</BaseLayout>
